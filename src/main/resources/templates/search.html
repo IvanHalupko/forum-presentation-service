@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Forum</title>
+<link
+	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+	rel="stylesheet" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<style>
+/* Remove the navbar's default margin-bottom and rounded borders */
+.navbar {
+	margin-bottom: 0;
+	border-radius: 0;
+}
+
+/* Set black background color, white text and some padding */
+footer {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	background-color: #555;
+	color: white;
+	padding: 15px;
+}
+</style>
+</head>
+<body>
+	<nav class="navbar navbar-inverse">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse"
+					data-target="#myNavbar">
+					<span class="icon-bar"></span> <span class="icon-bar"></span> <span
+						class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="/index">Forum</a>
+			</div>
+			<div class="collapse navbar-collapse" id="myNavbar">
+				<ul class="nav navbar-nav">
+					<li><a href="/index">Home</a></li>
+					<li class="active"><a href="/search">Search</a></li>
+					<li th:if="${sessionUser.getId() != null}"><a href="/archivation">Archivation</a></li>
+					<li th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}"><a href="/users">Users</a></li>
+					<li th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}"><a href="/category">Categories</a></li>
+				</ul>
+				<ul class="nav navbar-nav navbar-right">
+					<li th:if="${sessionUser.getId() == null}"><a href="/login"><span
+							class="glyphicon glyphicon-log-in"></span> Login</a></li>
+					<li th:if="${sessionUser.getId() != null}"><a href="/userInfo"><span
+							class="glyphicon glyphicon-user"></span> User info</a></li>
+					<li th:if="${sessionUser.getId() != null}"><a href="/login/out"><span
+							class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<div class="container">
+		<div style="padding-top: 10px">
+			<form role="form" action="#" class="form-inline"
+				  th:action="@{/search}" th:object="${search}" method="post">
+
+				<div class="form-group">
+					<input type="text" class="form-control" id="search"
+						   placeholder="Enter your information" th:field="*{searchString}" required="required"></input>
+					<button type="submit" name="searchStart" class="btn btn-primary">
+						Search <span class="glyphicon glyphicon-search"></span>
+					</button>
+				</div>
+			</form>
+
+			<section id="searchResult" style="padding-top: 10px">
+				<table id="resultTable" class="table table-bordered"
+					   th:if="${results != null and not #lists.isEmpty(results)}">
+					<thead>
+					<tr class="center middle">
+						<th>Topic</th>
+						<th>Create date</th>
+					</tr>
+					</thead>
+					<tbody>
+					<tr th:each="topic : ${results}">
+						<td><a th:href="'/answer/'+${topic.id}"
+							   th:text="${topic.topicName}"></a></td>
+						<td th:text="${#dates.format(new java.util.Date(topic.topicDate), 'dd-MMM-yy HH:mm:ss')}"></td>
+					</tr>
+					<tr th:remove="all">
+						<td>Topic 2</td>
+						<td>User 2</td>
+					</tr>
+					<tr th:remove="all">
+						<td>Topic 3</td>
+						<td>User 3</td>
+					</tr>
+					</tbody>
+				</table>
+
+			</section>
+
+		</div>
+	</div>
+	<footer class="container-fluid text-center">
+		<p>Copyright © 2016 Ivan Khalupko</p>
+		<p>All rights reserved.</p>
+	</footer>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<title>Forum</title>
+	<link
+			href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+			rel="stylesheet" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<style>
+		/* Remove the navbar's default margin-bottom and rounded borders */
+		.navbar {
+			margin-bottom: 0;
+			border-radius: 0;
+		}
+
+		/* Set black background color, white text and some padding */
+		footer {
+			position: absolute;
+			bottom: 0;
+			width: 100%;
+			background-color: #555;
+			color: white;
+			padding: 15px;
+		}
+	</style>
+</head>
+<body>
+<nav class="navbar navbar-inverse">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse"
+					data-target="#myNavbar">
+				<span class="icon-bar"></span> <span class="icon-bar"></span> <span
+					class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="/index">Forum</a>
+		</div>
+		<div class="collapse navbar-collapse" id="myNavbar">
+			<ul class="nav navbar-nav">
+				<li><a href="/index">Home</a></li>
+				<li><a href="/search">Search</a></li>
+				<li th:if="${sessionUser.getId() != null}"><a href="/archivation">Archivation</a></li>
+				<li class="active" th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}"><a href="/users">Users</a></li>
+				<li th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}"><a href="/category">Categories</a></li>
+			</ul>
+			<ul class="nav navbar-nav navbar-right">
+				<li th:if="${sessionUser.getId() == null}"><a href="/login"><span
+						class="glyphicon glyphicon-log-in"></span> Login</a></li>
+				<li th:if="${sessionUser.getId() != null}"><a href="/user-info"><span
+						class="glyphicon glyphicon-user"></span> User info</a></li>
+				<li th:if="${sessionUser.getId() != null}"><a href="/logout"><span
+						class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+			</ul>
+		</div>
+	</div>
+</nav>
+
+<div class="container">
+	<h4>Users</h4>
+	<table class="table table-striped">
+		<thead>
+		<tr>
+			<th>Id</th>
+			<th>Name</th>
+			<th>Last name</th>
+			<th>Login</th>
+			<th>User role</th>
+			<th th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}">Is user allow
+			</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr th:each="user : ${users}">
+			<td th:text="${user.id}">100500</td>
+			<td th:text="${user.userName}">Ivan</td>
+			<td th:text="${user.lastName}">Khalupko</td>
+			<td th:text="${user.login}">admin</td>
+			<td th:text="${user.userRole.name()}"></td>
+			<td th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}">
+				<a th:href="'/user/block/'+${user.id}" th:if="${user.isUserBlock} == false">Allow</a>
+				<a th:href="'/user/block/'+${user.id}" th:if="${user.isUserBlock} == true" style="color: red;">Banned</a>
+			</td>
+		</tr>
+		</tbody>
+	</table>
+	<button class="btn btn-success" onclick="history.go(-1);">Go back</button>
+</div>
+
+<footer class="container-fluid text-center">
+	<p>Copyright © 2016 Ivan Khalupko</p>
+	<p>All rights reserved.</p>
+</footer>
+</body>
+</html>

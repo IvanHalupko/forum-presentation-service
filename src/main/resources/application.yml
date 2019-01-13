@@ -1,0 +1,30 @@
+# Spring properties
+spring:
+  application:
+    name: presentation-service  # Identify this application
+  freemarker:
+    enabled: false     # Ignore Eureka dashboard FreeMarker templates
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    enabled: true
+    suffix: .html
+
+# Map the error path to error template (for Thymeleaf)
+error.path: /error
+
+# HTTP Server
+server.port: 8088   # HTTP (Tomcat) port
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8081/eureka/
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+
+management.endpoints.web.exposure.include: '*'
+
+services:
+  user: user-service
+  data: persistence-service

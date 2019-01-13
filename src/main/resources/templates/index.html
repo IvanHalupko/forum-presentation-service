@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Forum</title>
+    <link
+            href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+            rel="stylesheet" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+        /* Remove the navbar's default margin-bottom and rounded borders */
+        .navbar {
+            margin-bottom: 0;
+            border-radius: 0;
+        }
+
+        /* Set black background color, white text and some padding */
+        footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background-color: #555;
+            color: white;
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target="#myNavbar">
+                <span class="icon-bar"></span> <span class="icon-bar"></span> <span
+                    class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/index">Forum</a>
+        </div>
+        <div class="collapse navbar-collapse" id="myNavbar">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/index">Home</a></li>
+                <li><a href="/search">Search</a></li>
+                <li th:if="${sessionUser.getId() != null}"><a href="/archivation">Archivation</a></li>
+                <li th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}"><a
+                        href="/users">Users</a></li>
+                <li th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}"><a
+                        href="/category">Categories</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li th:if="${sessionUser.getId() == null}"><a href="/login"><span
+                        class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                <li th:if="${sessionUser.getId() != null}"><a href="/user-info"><span
+                        class="glyphicon glyphicon-user"></span> User info</a></li>
+                <li th:if="${sessionUser.getId() != null}"><a href="/logout"><span
+                        class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+
+    <h4>Topics</h4>
+    <table class="table table-striped"
+           th:if="${listTopic != null and not #lists.isEmpty(listTopic)}">
+        <thead>
+        <tr>
+            <th>Name of topic</th>
+            <th>Date</th>
+            <th>User name</th>
+            <th>Count answer</th>
+            <th th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}">Remove
+                topic</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="top : ${listTopic}" th:object="${sessionUser}">
+            <td><a th:href="'/answer/'+${top.id}+'/'"
+                   th:text="${top.topicName}"></a></td>
+            <td th:text="${#dates.format(new java.util.Date(top.topicDate), 'dd-MMM-yy HH:mm:ss')}">12-Aug-2016 10:14:25</td>
+            <td th:text="${top.userName}">Author name</td>
+            <td th:text="${top.answers != null ? top.answers.size() : 0}">100500</td>
+            <td th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}">
+                <a th:href="'/index/remove/'+${top.id}">Remove</a>
+            </td>
+        </tr>
+
+        </tbody>
+    </table>
+
+    <div class="alert alert-info" th:if="${listTopic == null or #lists.isEmpty(listTopic)}">
+        <strong>Not topics yet!</strong>
+    </div>
+
+    <!--<ul class="pager">-->
+        <!--<li th:if="${tPage} > 0" class="previous"><a th:href="pr">Previous</a></li>-->
+        <!--<li th:if="${#lists.size(topAll)} > 10 AND ${#lists.size(listTopic)} == 10" class="next"><a th:href="'/index/'+${tPage}+'/nx'">Next</a></li>-->
+    <!--</ul>-->
+
+    <form action="#" th:action="@{/topic}" th:object="${topic}"
+          method="post" th:if="${sessionUser.getId() != null}">
+        <h4>Add new topic</h4>
+        <div class="form-group">
+            <label for="topicName">Topic name:</label> <input type="text" required="required"
+                                                               th:field="*{topicName}" class="form-control" id="topicName"
+                                                               placeholder="Enter topic name"></input>
+        </div>
+        <!--<div class="form-group">-->
+            <!--<select class="form-control" th:field="*{section_id}">-->
+                <!--<option th:each="var : ${allSections}" th:value="${var.id}"-->
+                        <!--th:text="${var.section_name}"></option>-->
+            <!--</select>-->
+        <!--</div>-->
+        <button type="submit" name="addTopic" class="btn btn-success">Add
+            topic</button>
+    </form>
+
+</div>
+
+<footer class="container-fluid text-center">
+    <p>Copyright © 2016 Ivan Khalupko</p>
+    <p>All rights reserved.</p>
+</footer>
+</body>
+</html>

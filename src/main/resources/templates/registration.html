@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Registration</title>
+<link
+	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+	rel="stylesheet" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<style>
+/* Remove the navbar's default margin-bottom and rounded borders */
+.navbar {
+	margin-bottom: 0;
+	border-radius: 0;
+}
+
+/* Set black background color, white text and some padding */
+footer {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	background-color: #555;
+	color: white;
+	padding: 15px;
+}
+</style>
+</head>
+<body>
+	<nav class="navbar navbar-inverse">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse"
+					data-target="#myNavbar">
+					<span class="icon-bar"></span> <span class="icon-bar"></span> <span
+						class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="/index">Forum</a>
+			</div>
+			<div class="collapse navbar-collapse" id="myNavbar">
+				<ul class="nav navbar-nav">
+					<li><a href="/index">Home</a></li>
+					<li><a href="/search">Search</a></li>
+					<li th:if="${sessionUser.getId() != null}"><a href="/archivation">Archivation</a></li>
+					<li th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}"><a href="/users">Users</a></li>
+					<li th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}"><a href="/category">Categories</a></li>
+				</ul>
+				<ul class="nav navbar-nav navbar-right">
+					<li th:if="${sessionUser.getId() == null}"><a href="/login"><span
+							class="glyphicon glyphicon-log-in"></span> Login</a></li>
+					<li th:if="${sessionUser.getId() != null}"><a href="/user-info"><span
+							class="glyphicon glyphicon-user"></span> User info</a></li>
+					<li th:if="${sessionUser.getId() != null}"><a href="/logout"><span
+							class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+	<div class="container">
+		<h4>New user</h4>
+		<form action="#" th:action="@{/registration}" th:object="${sessionUser}" method="post">
+			<div class="form-group">
+				<label for="user_name">Name:</label>
+				<input type="text" th:field="*{userName}" class="form-control" id="user_name" placeholder="Enter name" required="required"></input>
+			</div>
+			<div class="form-group">
+				<label for="last_name">Last name:</label>
+				<input type="text" th:field="*{lastName}" class="form-control" id="last_name" placeholder="Enter last name" required="required"></input>
+			</div>
+			<div class="form-group">
+				<label for="login">Login:</label>
+				<label th:if="${loginExists != null}" for="login" th:text="${loginExists}" style="color: red;"></label>
+				<input type="text" th:field="*{login}" class="form-control" id="login" placeholder="Enter login" required="required"></input>
+			</div>
+			<div class="form-group">
+				<label for="password">Password:</label>
+				<input type="password" th:field="*{password}" class="form-control" id="password" placeholder="Enter password" required="required"></input>
+			</div>
+			<button type="submit" name="addUser" class="btn btn-default">Registration</button>
+		</form>
+	</div>
+
+	<footer class="container-fluid text-center">
+		<p>Copyright © 2016 Ivan Khalupko</p>
+		<p>All rights reserved.</p>
+	</footer>
+</body>
+</html>
