@@ -82,10 +82,10 @@ footer {
 			<strong>Not answers yet!</strong>
 		</div>
 
-		<!--<ul class="pager">-->
-			<!--<li th:if="${page} > 0" class="previous"><a th:href="pr">Previous</a></li>-->
-			<!--<li th:if="${#lists.size(answAll)} > 10 AND ${#lists.size(listAnswer)} == 10" class="next"><a th:href="nx">Next</a></li>-->
-		<!--</ul>-->
+		<ul class="pager">
+			<li th:if="${page} > 0" class="previous"><a th:href="'/answer/'+ ${topicId} + '/' +${page - 1}">Previous</a></li>
+			<li th:if="${pages} > ${page + 1} AND ${#lists.size(listAnswer)} == 5" class="next"><a th:href="'/answer/'+ ${topicId} + '/' +${page + 1}">Next</a></li>
+		</ul>
 
 		<form action="#" th:action="@{/answer}"
 			  th:object="${answer}" method="post"

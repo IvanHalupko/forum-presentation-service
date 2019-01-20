@@ -91,10 +91,10 @@
         <strong>Not topics yet!</strong>
     </div>
 
-    <!--<ul class="pager">-->
-        <!--<li th:if="${tPage} > 0" class="previous"><a th:href="pr">Previous</a></li>-->
-        <!--<li th:if="${#lists.size(topAll)} > 10 AND ${#lists.size(listTopic)} == 10" class="next"><a th:href="'/index/'+${tPage}+'/nx'">Next</a></li>-->
-    <!--</ul>-->
+    <ul class="pager">
+        <li th:if="${page} > 0" class="previous"><a th:href="'/index/'+${page - 1}">Previous</a></li>
+        <li th:if="${pages} > ${page + 1} AND ${#lists.size(listTopic)} == 5" class="next"><a th:href="'/index/'+${page + 1}">Next</a></li>
+    </ul>
 
     <form action="#" th:action="@{/topic}" th:object="${topic}"
           method="post" th:if="${sessionUser.getId() != null}">

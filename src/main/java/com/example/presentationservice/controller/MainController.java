@@ -7,6 +7,7 @@ import com.example.presentationservice.model.User;
 import com.example.presentationservice.model.UserRole;
 import com.example.presentationservice.service.PersistenceService;
 import com.example.presentationservice.service.UserService;
+import com.example.presentationservice.utils.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
@@ -20,9 +21,12 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 
 import java.util.List;
+import java.util.Optional;
 
+import static com.example.presentationservice.utils.Constants.LIMIT;
 import static com.example.presentationservice.utils.DateUtils.getCurrentTimestamp;
 import static com.example.presentationservice.utils.HashUtils.hashPassword;
+import static java.util.stream.Collectors.toList;
 
 @Controller
 @Scope("session")
@@ -44,17 +48,21 @@ public class MainController {
     private String currentTopicId;
 
     // *** Main page with topics
-    @GetMapping(value = {"/", "/index"})
-    public String getIndex(@ModelAttribute("topic") Topic topic, Model model) {
-        //new Topic()
-//        resetCurrentPage();
+    @GetMapping(value = {"/", "/index", "/index/{page}"})
+    public String getIndex(
+            @ModelAttribute("topic") Topic topic,
+            @PathVariable Optional<Integer> page,
+            Model model) {
+
+        Integer currentPage = page.orElse(0);
+        long topicsCount = persistenceService.getTopicCount();
+        currentPage = PageUtil.pageValidation(currentPage, topicsCount);
+
         model.addAttribute("topic", topic);
-//        model.addAttribute("page", String.valueOf(currentPage));
-//        model.addAttribute("tPage", String.valueOf(topPage));
+        model.addAttribute("page", currentPage);
         model.addAttribute("sessionUser", sessionUser);
-        model.addAttribute("listTopic", persistenceService.getTopics());
-//        model.addAttribute("topAll", topicService.getAll());
-//        model.addAttribute("usNm", topic.getUserName());
+        model.addAttribute("listTopic", persistenceService.getTopics(currentPage));
+        model.addAttribute("pages", PageUtil.getPages(topicsCount));
         return "/index";
     }
 
@@ -100,7 +108,7 @@ public class MainController {
     public String saveUser(
             @ModelAttribute("sessionUser") User user,
             Model model,
-            final BindingResult bindingResult) throws Exception {
+            final BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             return "registration";
@@ -145,14 +153,23 @@ public class MainController {
     }
 
     // *** Get answers page
-    @GetMapping("/answer/{topicId}")
-    public String showAnswer(@PathVariable("topicId") String topicId, Model model) {
-//        resetTopPage();
-//        currentPage = page;
-//        model.addAttribute("page", String.valueOf(currentPage));
-        model.addAttribute("listAnswer", persistenceService.getTopicById(topicId).getAnswers());
-//        model.addAttribute("answAll", answerService.getForId(id));
+    @GetMapping(value = {"/answer/{topicId}", "/answer/{topicId}/{page}"})
+    public String showAnswer(
+            @PathVariable("topicId") String topicId,
+            @PathVariable Optional<Integer> page,
+            Model model) {
+
+
+        Integer currentPage = page.orElse(0);
+        List<Answer> answers = persistenceService.getTopicById(topicId).getAnswers();
+        long answersCount = answers.size();
+        currentPage = PageUtil.pageValidation(currentPage, answersCount);
+
+        model.addAttribute("page", currentPage);
+        model.addAttribute("listAnswer", answers.stream().skip(currentPage * LIMIT).limit(LIMIT).collect(toList()));
+        model.addAttribute("pages", PageUtil.getPages(answersCount));
         model.addAttribute("answer", new Answer());
+        model.addAttribute("topicId", topicId);
         currentTopicId = topicId;
         return "answer";
     }
@@ -193,8 +210,6 @@ public class MainController {
 
     @GetMapping("/search")
     public String setupForm(Model model) {
-//        resetTopPage();
-//        resetCurrentPage();
         model.addAttribute("search", new SearchTopicWrapper());
         return "search";
     }

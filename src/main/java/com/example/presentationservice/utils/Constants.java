@@ -6,4 +6,5 @@ public class Constants {
     }
 
     public static final String HTTP_PREFIX = "http://";
+    public static final int LIMIT = 5;
 }

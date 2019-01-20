@@ -2,6 +2,7 @@ package com.example.presentationservice.service;
 
 import com.example.presentationservice.model.Answer;
 import com.example.presentationservice.model.Topic;
+import com.example.presentationservice.model.TopicCountWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.example.presentationservice.utils.Constants.HTTP_PREFIX;
 
@@ -29,9 +33,9 @@ public class PersistenceService {
     @LoadBalanced
     private RestTemplate restTemplate;
 
-    public List<Topic> getTopics() {
+    public List<Topic> getTopics(Integer page) {
         ResponseEntity<List<Topic>> responseEntity = restTemplate.exchange(
-                HTTP_PREFIX + persistenceServiceName + "/topic",
+                HTTP_PREFIX + persistenceServiceName + "/topics/" + page,
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<List<Topic>>() {
@@ -40,8 +44,26 @@ public class PersistenceService {
         return responseEntity.getBody();
     }
 
+    public long getTopicCount() {
+        TopicCountWrapper count = restTemplate
+                .getForObject(HTTP_PREFIX + persistenceServiceName + "/topic-count", TopicCountWrapper.class);
+
+        // TODO: logger
+        return count.getTopicCount() == null ? 0 : count.getTopicCount();
+    }
+
     public Topic getTopicById(String id) {
-        return restTemplate.getForObject(HTTP_PREFIX + persistenceServiceName + "/topic/" + id, Topic.class);
+        Topic topic = restTemplate.getForObject(HTTP_PREFIX + persistenceServiceName + "/topic/" + id, Topic.class);
+        List<Answer> answerList = topic != null ? topic.getAnswers() : null;
+        if(answerList != null) {
+            List<Answer> answers = answerList.stream()
+                    .sorted(Comparator.comparing(Answer::getDateAnswer).reversed())
+                    .collect(Collectors.toList());
+            topic.setAnswers(answers);
+        } else {
+            topic.setAnswers(Collections.emptyList());
+        }
+        return topic;
     }
 
     public void saveTopic(Topic topic) {
