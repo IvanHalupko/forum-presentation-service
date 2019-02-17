@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Forum</title>
+<link
+	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+	rel="stylesheet" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Refresh" content="7" />
+	<style>
+/* Remove the navbar's default margin-bottom and rounded borders */
+.navbar {
+	margin-bottom: 0;
+	border-radius: 0;
+}
+
+/* Set black background color, white text and some padding */
+footer {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	background-color: #555;
+	color: white;
+	padding: 15px;
+}
+</style>
+</head>
+<body>
+<nav class="navbar navbar-inverse">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse"
+					data-target="#myNavbar">
+				<span class="icon-bar"></span> <span class="icon-bar"></span> <span
+					class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="/index">Forum</a>
+		</div>
+		<div class="collapse navbar-collapse" id="myNavbar">
+			<ul class="nav navbar-nav">
+				<li><a href="/index">Home</a></li>
+				<li class="active"><a href="/search">Search</a></li>
+				<li th:if="${sessionUser.getId() != null}"><a href="/archivation">Archivation</a></li>
+				<li th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}"><a href="/users">Users</a></li>
+			</ul>
+			<ul class="nav navbar-nav navbar-right">
+				<li th:if="${sessionUser.getId() == null}"><a href="/login"><span
+						class="glyphicon glyphicon-log-in"></span> Login</a></li>
+				<li th:if="${sessionUser.getId() != null}"><a href="/userInfo"><span
+						class="glyphicon glyphicon-user"></span> User info</a></li>
+				<li th:if="${sessionUser.getId() != null}"><a href="/login/out"><span
+						class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+			</ul>
+		</div>
+	</div>
+</nav>
+
+	<div class="container">
+		<label>You can download an archive with all topics and answers</label>
+		<form action="#" th:action="@{/archivation}" 
+			method="post">
+			<h4 th:text="${name}">A</h4>
+			<p><a href="/download" th:if="${name} == 'Ready for download'" target="_blank"><span class="glyphicon glyphicon-save"></span> Link for download</a></p>
+			<button th:if="${name} != 'Ready for download'" type="submit" name="archivation" class="btn btn-success">Get archive</button>
+		</form>
+	</div>
+
+	<footer class="container-fluid text-center">
+		<p>Copyright © 2016 Ivan Khalupko</p>
+		<p>All rights reserved.</p>
+	</footer>
+</body>
+</html>

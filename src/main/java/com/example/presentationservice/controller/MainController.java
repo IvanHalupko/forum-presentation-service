@@ -5,6 +5,7 @@ import com.example.presentationservice.model.SearchTopicWrapper;
 import com.example.presentationservice.model.Topic;
 import com.example.presentationservice.model.User;
 import com.example.presentationservice.model.UserRole;
+import com.example.presentationservice.service.ArchivationService;
 import com.example.presentationservice.service.PersistenceService;
 import com.example.presentationservice.service.UserService;
 import com.example.presentationservice.utils.PageUtil;
@@ -20,8 +21,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static com.example.presentationservice.utils.Constants.LIMIT;
 import static com.example.presentationservice.utils.DateUtils.getCurrentTimestamp;
@@ -34,17 +43,20 @@ import static java.util.stream.Collectors.toList;
 public class MainController {
 
     private final UserService userService;
-
     private final PersistenceService persistenceService;
+    private final ArchivationService archivationService;
 
     @Autowired
-    public MainController(UserService userService, PersistenceService persistenceService) {
+    public MainController(UserService userService,
+                          PersistenceService persistenceService,
+                          ArchivationService archivationService) {
         this.userService = userService;
         this.persistenceService = persistenceService;
+        this.archivationService = archivationService;
     }
 
     private User sessionUser = new User();
-
+    private Future<byte[]> futureFile;
     private String currentTopicId;
 
     // *** Main page with topics
@@ -200,7 +212,6 @@ public class MainController {
     @GetMapping("/answer/{topicId}/remove/{userId}/{date}")
     public String getAnswerRemove(
             @PathVariable("topicId") String topicId,
-//            @PathVariable("page") int page,
             @PathVariable("userId") String userId,
             @PathVariable("date") Long date) {
 
@@ -219,6 +230,67 @@ public class MainController {
         model.addAttribute("search", search);
         model.addAttribute("results", persistenceService.findTopicByText(search.getSearchString()));
         return "search";
+    }
+
+    @Scope("session")
+    @GetMapping("/archivation")
+    public String archivShow(Model model) {
+        if(futureFile != null) {
+            if(futureFile.isDone()) {
+                model.addAttribute("name", "Ready for download");
+            }
+            else {
+                model.addAttribute("name", "Your archive is being created now ...");
+            }
+        }
+        else {
+            model.addAttribute("name", "Click 'get archive' for download");
+        }
+        return "archivation";
+    }
+
+    @Scope("session")
+    @PostMapping(value = "/archivation", params = { "archivation" })
+    public String archivProcess(Model model) {
+        model.addAttribute("name", "Click 'get archive' for download");
+        try {
+            futureFile = archivationService.getArchieve();
+            if(futureFile.isDone()) {
+                model.addAttribute("name", "Ready for download");
+                model.addAttribute("file", futureFile);
+            } else {
+                model.addAttribute("name", "Your archive is being created now ...");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "archivation";
+    }
+
+    @Scope("session")
+    @GetMapping("/download")
+    public void doDownloadFile(HttpServletRequest request, HttpServletResponse response) throws IOException, ExecutionException, InterruptedException {
+        ServletContext context = request.getServletContext();
+
+        ByteArrayInputStream downloadFile = new ByteArrayInputStream(futureFile.get());
+        response.setContentType("application/octet-stream");
+        response.setContentLength(futureFile.get().length);
+        String headerKey = "Content-Disposition";
+        String headerValue = String.format("attachment; filename=\"%s\"",
+                "all_topics.zip");
+        response.setHeader(headerKey, headerValue);
+        OutputStream outStream = response.getOutputStream();
+
+        byte[] buffer = new byte[4096];
+        int bytesRead = -1;
+
+        // write bytes read from the input stream into the output stream
+        while ((bytesRead = downloadFile.read(buffer)) != -1) {
+            outStream.write(buffer, 0, bytesRead);
+        }
+
+        downloadFile.close();
+        outStream.close();
     }
 
     // *** Login user page
@@ -258,7 +330,7 @@ public class MainController {
         session.setComplete();
         sessionUser = new User();
 //        archivationService.reset();
-//        tl = null;
+        futureFile = null;
         return "redirect:/index";
     }
 }

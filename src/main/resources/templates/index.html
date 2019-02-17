@@ -42,8 +42,6 @@
                 <li th:if="${sessionUser.getId() != null}"><a href="/archivation">Archivation</a></li>
                 <li th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}"><a
                         href="/users">Users</a></li>
-                <li th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}"><a
-                        href="/category">Categories</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li th:if="${sessionUser.getId() == null}"><a href="/login"><span
@@ -104,12 +102,6 @@
                                                                th:field="*{topicName}" class="form-control" id="topicName"
                                                                placeholder="Enter topic name"></input>
         </div>
-        <!--<div class="form-group">-->
-            <!--<select class="form-control" th:field="*{section_id}">-->
-                <!--<option th:each="var : ${allSections}" th:value="${var.id}"-->
-                        <!--th:text="${var.section_name}"></option>-->
-            <!--</select>-->
-        <!--</div>-->
         <button type="submit" name="addTopic" class="btn btn-success">Add
             topic</button>
     </form>

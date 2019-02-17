@@ -44,6 +44,17 @@ public class PersistenceService {
         return responseEntity.getBody();
     }
 
+    public List<Topic> getAllTopicsForArchivation() {
+        ResponseEntity<List<Topic>> responseEntity = restTemplate.exchange(
+                HTTP_PREFIX + persistenceServiceName + "/topics",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<Topic>>() {
+                });
+
+        return responseEntity.getBody();
+    }
+
     public long getTopicCount() {
         TopicCountWrapper count = restTemplate
                 .getForObject(HTTP_PREFIX + persistenceServiceName + "/topic-count", TopicCountWrapper.class);

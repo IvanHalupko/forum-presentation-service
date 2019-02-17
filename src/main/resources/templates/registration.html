@@ -41,7 +41,6 @@ footer {
 					<li><a href="/search">Search</a></li>
 					<li th:if="${sessionUser.getId() != null}"><a href="/archivation">Archivation</a></li>
 					<li th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}"><a href="/users">Users</a></li>
-					<li th:if="${sessionUser.getId() != null and sessionUser.getUserRole().name() == 'ADMIN'}"><a href="/category">Categories</a></li>
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
 					<li th:if="${sessionUser.getId() == null}"><a href="/login"><span
